@@ -1,0 +1,54 @@
+component sensors_new
+%Plant of quadrocopter
+
+inputs
+    pos={[0;0;0],'m'}; %Position:left
+    v = {[0;0;0], 'm/s' }; %Velocity:left
+    a = {[0;0;0], 'm/s^2' }; %Acceleration:left
+    
+    angle = {[0;0;0],'rad'};%Angle:left
+    w = {[0;0;0],'rad/s'};%Angular velocity:left
+end
+
+outputs
+    acc={[0;0;0],'1'}; %Accelerometer:right
+    gyro = {[0;0;0],'rad/s'};%Gyroscope:right
+end
+
+parameters
+    m = {0.027,'kg'};%Mass
+    g = {9.81,'m/s^2'};%Gravity
+    d = {0.046,'m'};%Arm length
+    % New parameters
+    k = {2.5383e-11,'m'}; %Drag constant
+    b = {1.9796e-9,'1'};  %Lift constant
+    F = {0.1,'N*s/m'}
+    % Old parameters
+%     k = {2.75e-11,'1'};%Drag constant
+%     b = {1e-9,'1'};    %Lift constant
+end
+
+variables(Access=private)
+    %Rotation matrix
+    R={[0,0,0;0,0,0;0,0,0],'1'};
+    Rx={[0,0,0;0,0,0;0,0,0],'1'};
+    Ry={[0,0,0;0,0,0;0,0,0],'1'};
+    Rz={[0,0,0;0,0,0;0,0,0],'1'};
+
+end
+
+equations
+
+    %Rotation matrix between world and quadrocopter coordinates
+    Rx==[1,0,0;0,cos(angle(1)),-sin(angle(1));0,sin(angle(1)),cos(angle(1))];
+    Ry==[cos(angle(2)),0,sin(angle(2));0,1,0;-sin(angle(2)),0,cos(angle(2))];
+    Rz==[cos(angle(3)),-sin(angle(3)),0;sin(angle(3)),cos(angle(3)),0;0,0,1];
+    R==Rx*Ry*Rz;
+    
+    % Accelerometer equation: adding the gravity component and scaling to unit (m/s^2/g = 1), then rotating to quadrotor frame
+    R*acc == a./g + [0;0;1]
+    
+    % Gyroscope
+    gyro == w
+end
+end

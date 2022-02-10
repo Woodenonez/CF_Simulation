@@ -1,0 +1,88 @@
+component plant
+%Plant of quadrocopter
+
+inputs
+    ctrl={[0;0;0;0],'N'}; %Thrust:left
+end
+
+outputs
+    pos = {[0;0;0],'m'}; %Position:right
+    v = {[0;0;0], 'm/s' }; %Velocity:right
+    a = {[0;0;0], 'm/s^2' }; %Acceleration:right
+
+    angle = {[0;0;0],'rad'};%Angle:right
+    w = {[0;0;0],'rad/s'};%Angular velocity:right
+end
+
+parameters
+    m = {0.027,'kg'};%Mass
+    g = {9.81,'m/s^2'};%Gravity
+    d = {0.046,'m'};%Arm length
+    % New parameters
+    k = {2.5383e-11,'m'}; %Drag constant
+    b = {1.9796e-9,'1'};  %Lift constant
+    % Old parameters
+%     k = {2.75e-11,'1'};%Drag constant
+%     b = {1e-9,'1'};    %Lift constant
+end
+
+parameters(Access=private)
+    %Moment of inertia matrix
+    % New parameters
+    Jx = {1.1463e-5,'kg*m^2'};
+    Jy = {1.6993e-5,'kg*m^2'};
+    Jz = {2.9944e-5,'kg*m^2'};
+    % Old parameters
+%     Jx = {1.395e-5,'kg*m^2'};
+%     Jy = {1.436e-5,'kg*m^2'};
+%     Jz = {2.173e-5,'kg*m^2'};
+    
+    J = [Jx,0,0;0,Jy,0;0,0,Jz];
+
+    % Add time invariant parameters here 
+
+end
+
+variables(Access=private)
+    
+    % Add time variant variables here
+    Tau = {[0;0;0], 'N*m'};
+%     alpha = {[0;0;0], 'rad/s^2'};
+    
+    Rx = {eye(3,3), '1'};
+    Ry = {eye(3,3), '1'};
+    Rz = {eye(3,3), '1'};
+    
+end
+
+equations
+
+    % Add all equations here
+    
+    Rx == [1, 0, 0; 0, cos(angle(1)), -sin(angle(1)); 0, sin(angle(1)), cos(angle(1))];
+    Ry == [cos(angle(2)), 0, sin(angle(2)); 0, 1, 0; -sin(angle(2)), 0, cos(angle(2))];
+    Rz == [cos(angle(3)), sin(angle(3)), 0; -sin(angle(3)), cos(angle(3)), 0; 0, 0, 1];
+    
+    Tau == [-1, -1,  1,  1;...
+            -1,  1,  1, -1;...
+            -1,  1, -1,  1] * ctrl .* [d/sqrt(2); d/sqrt(2); k/b];
+    J * w.der == -cross(w,J*w) + Tau;
+    
+    a ==  [0; 0; -g] + Rx*Ry*Rz*[0;0;sum(ctrl)]/m;
+%     a == 0;
+    
+    angle.der == w;
+    v.der == a;
+    pos.der == v;
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % REPLACE/REMOVE ALL THESE EQUATIONS
+    % pos == {[0;0;0],'m'};
+    % v == {[0;0;0], 'm/s' };
+    % a == {[0;0;0], 'm/s^2' };
+    % angle == {[0;0;0],'rad'};
+    % w == {[0;0;0],'rad/s'};
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+end
+end

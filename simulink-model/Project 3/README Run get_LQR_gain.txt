@@ -1,0 +1,1 @@
+Just run get_LQR_gain.m is enough.
