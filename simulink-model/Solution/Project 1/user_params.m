@@ -26,6 +26,8 @@ end
 try
     set_param('closed_loop', 'StopTime', ...
            num2str(Acc_x.time(end)));
+    set_param('crazyflie', 'StopTime', ...
+           num2str(Acc_x.time(end)));
 catch
     disp('Skip closed_loop.')
 end

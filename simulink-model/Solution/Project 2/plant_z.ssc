@@ -6,9 +6,9 @@ inputs
 end
 
 outputs
-    pos = {[0;0;0],'m'}; %Position:right
-    v = {[0;0;0], 'm/s' }; %Velocity:right
-    a = {[0;0;0], 'm/s^2' }; %Acceleration:right
+    pos = {[0;0;0],'m'};       %Position:right
+    v   = {[0;0;0], 'm/s' };   %Velocity:right
+    a   = {[0;0;0], 'm/s^2' }; %Acceleration:right
 
     angle = {[0;0;0],'rad'};%Angle:right
     w = {[0;0;0],'rad/s'};%Angular velocity:right
@@ -21,7 +21,7 @@ parameters
     % New parameters
     k = {2.5383e-11,'m'}; %Drag constant
     b = {1.9796e-9,'1'};  %Lift constant
-    F = {0.1,'N*s/m'}
+    F = {0.25,'N*s/m'}
     % Old parameters
 %     k = {2.75e-11,'1'};%Drag constant
 %     b = {1e-9,'1'};    %Lift constant
@@ -60,16 +60,16 @@ equations
     % Add all equations here
     % The rotation matrix defines a rotation along some axis from the current coorinate system.
     % (To complete an Euler angle representation, an order must be defined.)
-    % ### W->B:ZYX, B->W:XYZ ### (XYZ means first X, then Y, last Z)
+    % ### W->B:zyx, B->W:XYZ ### (XYZ means first X, then Y, last Z)
     
     Rx == [1, 0, 0; 0, cos(angle(1)), -sin(angle(1)); 0, sin(angle(1)), cos(angle(1))];
     Ry == [cos(angle(2)), 0, sin(angle(2)); 0, 1, 0; -sin(angle(2)), 0, cos(angle(2))];
-    Rz == [cos(angle(3)), sin(angle(3)), 0; -sin(angle(3)), cos(angle(3)), 0; 0, 0, 1];
+    Rz == [cos(angle(3)), -sin(angle(3)), 0; sin(angle(3)), cos(angle(3)), 0; 0, 0, 1];
     
     Tau == [-1, -1,  1,  1;...
             -1,  1,  1, -1;...
             -1,  1, -1,  1] * ctrl .* [d/sqrt(2); d/sqrt(2); k/b];
-    J * w.der == -cross(w,J*w) + Tau;
+    J * w.der == -cross(w,J*w) + Tau; % body frame, w goes to Gyro directly
     
 %     a ==  [0; 0; -g] + Rz*Ry*Rx*[0;0;sum(ctrl)]/m; % a in world frame
     a ==  [0; 0; -g] + Rz*Ry*Rx*[0;0;sum(ctrl)]/m - F.*[v(1);v(2);v(3)]/m; % with air friction

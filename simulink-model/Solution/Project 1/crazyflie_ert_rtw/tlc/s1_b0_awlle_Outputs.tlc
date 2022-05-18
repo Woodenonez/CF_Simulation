@@ -1,0 +1,192 @@
+%implements s1_b0_awlle_Outputs "C"
+
+%function Outputs(block, system) Output
+%assign cfgTxt = ""
+%openfile cfgTxt
+%assign localVarDecl = ""
+%openfile localVarDecl
+
+real_T scale;
+real_T absxk;
+real_T t;
+real_T rtb_Gain;
+real_T rtb_Sum;
+real_T rtb_Sum3;
+real_T rtb_Gain_e;
+real_T rtb_Sum1_d;
+real_T rtb_Sum1_n;
+%closefile localVarDecl
+%<SLibCG_TrackEO(3)>\
+%<SLibCG_TrackEO(2)>\
+%<SLibCG_TrackEO(1)>\
+%<SLibCG_TrackEO(0)>\
+%<SLibCG_TrackEI(8)>\
+%<SLibCG_TrackEI(7)>\
+%<SLibCG_TrackEI(6)>\
+%<SLibCG_TrackEI(5)>\
+%<SLibCG_TrackEI(4)>\
+%<SLibCG_TrackEI(2)>\
+%<SLibCG_TrackEI(1)>\
+%<SLibCG_TrackEI(0)>\
+if (%<(SLibCGIRIsSampleHit(1, 1))>) {
+    /* {S!d16}Gain: '<S3>/Gain' incorporates:
+ *  Inport: '<Root>/Base_Thrust'
+ */
+    /*@>11906*/rtb_Gain/*@>db44*/ = /*@>11984*/0.5/*@>11b38*/ * /*@>1329c*/crazyflie_U./*@>13b04*/Base_Thrust;
+    /* {S!d18}Sum: '<S1>/Sum' incorporates:
+ *  Delay: '<S6>/Delay'
+ *  Gain: '<S1>/factor'
+ *  Gain: '<S1>/mfactor'
+ *  Gain: '<S1>/rad2deg'
+ *  Gain: '<S6>/Gain1'
+ *  Inport: '<Root>/Acc_y'
+ *  Inport: '<Root>/Acc_z'
+ *  Inport: '<Root>/Gyro_x'
+ *  Sum: '<S6>/Sum1'
+ *  Trigonometry: '<S1>/Atan2'
+ */
+    /*@>1194e*/rtb_Sum/*@>e6c8*/ = (/*@>11988*/0.01/*@>11b34*/ * /*@>132a2*/crazyflie_U./*@>13b07*/Gyro_x/*@>fd20*/ + /*@>13417*/crazyflie_DW./*@>13b49*/Delay_DSTATE)/*@>11b30*/ * /*@>11987*/0.98/*@>e6c5*/ + /*@>11986*/57.295779513082323/*@>11b2c*/ * /*@>12d35*/atan2(/*@>132a7*/crazyflie_U./*@>13b0a*/Acc_y, /*@>132ac*/crazyflie_U./*@>13b0d*/Acc_z)/*@>11b28*/ * /*@>11985*/0.020000000000000018;
+    /* {S!d20}Sum: '<S3>/Sum' incorporates:
+ *  Inport: '<Root>/Ref_Roll'
+ */
+    /*@>11950*/rtb_Sum3/*@>e6cd*/ = /*@>132b2*/crazyflie_U./*@>13b10*/Ref_Roll/*@>e6ca*/ - /*@>1190a*/rtb_Sum;
+    /* {S!d22}Sum: '<S3>/Sum1' */
+    /*@>11952*/rtb_Sum1_n/*@>e6d2*/ = /*@>1190c*/rtb_Gain/*@>e6cf*/ - /*@>1190e*/rtb_Sum3;
+    /* {S!d24}Gain: '<S4>/Gain' incorporates:
+ *  Inport: '<Root>/Base_Thrust'
+ */
+    /*@>11912*/rtb_Gain_e/*@>dd3e*/ = /*@>11989*/0.5/*@>11b24*/ * /*@>132b9*/crazyflie_U./*@>13b13*/Base_Thrust;
+    /* {S!d26}MATLAB Function: '<S1>/cal_pitch' incorporates:
+ *  Inport: '<Root>/Acc_y'
+ *  Inport: '<Root>/Acc_z'
+ */
+    /* MATLAB Function 'Complementary Filter/cal_pitch': '<S5>:1' */
+    /* '<S5>:1:3' pitch = atan2(-fx,norm([fy,fz])); */
+    /*@>1193a*/scale/*@>e5b7*/ = /*@>1193c*/3.3121686421112381E-170;
+    /*@>1198e*/absxk/*@>115eb*/ = /*@>12d37*/fabs(/*@>132c0*/crazyflie_U./*@>13b16*/Acc_y);
+    /*@>115f4*/if (/*@>11991*/absxk/*@>115f5*/ > /*@>119d3*/3.3121686421112381E-170) {
+        /*@>119a1*/rtb_Sum1_d/*@>11616*/ = /*@>119a3*/1.0;
+        /*@>119a4*/scale/*@>11624*/ = /*@>119a6*/absxk;
+    } else {
+        /*@>11993*/t/*@>115fb*/ = /*@>11995*/absxk/*@>115fd*/ / /*@>119d4*/3.3121686421112381E-170;
+        /*@>1199b*/rtb_Sum1_d/*@>1160b*/ = /*@>1199d*/t/*@>11b20*/ * /*@>1199f*/t;
+    }
+    /*@>119a8*/absxk/*@>1162b*/ = /*@>12d39*/fabs(/*@>132cb*/crazyflie_U./*@>13b19*/Acc_z);
+    /*@>11634*/if (/*@>119ab*/absxk/*@>11635*/ > /*@>119ad*/scale) {
+        /*@>119b5*/t/*@>11643*/ = /*@>119b7*/scale/*@>11645*/ / /*@>119b9*/absxk;
+        /*@>119c3*/rtb_Sum1_d/*@>11656*/ = /*@>119c5*/rtb_Sum1_d/*@>11b1c*/ * /*@>119c7*/t/*@>11b18*/ * /*@>119c9*/t/*@>11658*/ + /*@>119cb*/1.0;
+        /*@>119cc*/scale/*@>11664*/ = /*@>119ce*/absxk;
+    } else {
+        /*@>119af*/t/*@>1163b*/ = /*@>119b1*/absxk/*@>1163d*/ / /*@>119b3*/scale;
+        /*@>119bb*/rtb_Sum1_d/*@>139f8*/ += /*@>119bf*/t/*@>11b14*/ * /*@>119c1*/t;
+    }
+    /*@>11941*/rtb_Sum1_d/*@>e5ca*/ = /*@>1193d*/scale/*@>11b10*/ * /*@>12d3b*/sqrt(/*@>1193f*/rtb_Sum1_d);
+    /* {S!d28}Sum: '<S1>/Sum1' incorporates:
+ *  Delay: '<S7>/Delay'
+ *  Gain: '<S1>/factor1'
+ *  Gain: '<S1>/mfactor1'
+ *  Gain: '<S1>/rad2deg1'
+ *  Gain: '<S7>/Gain1'
+ *  Inport: '<Root>/Acc_x'
+ *  Inport: '<Root>/Gyro_y'
+ *  MATLAB Function: '<S1>/cal_pitch'
+ *  Sum: '<S7>/Sum1'
+ */
+    /*@>11954*/rtb_Sum1_d/*@>e6dc*/ = (/*@>1198d*/0.01/*@>11b0c*/ * /*@>132d8*/crazyflie_U./*@>13b1c*/Gyro_y/*@>fd4d*/ + /*@>1341d*/crazyflie_DW./*@>13b4c*/Delay_DSTATE_d)/*@>11b08*/ * /*@>1198c*/0.98/*@>e6d9*/ + /*@>1198b*/57.295779513082323/*@>11b03*/ * /*@>12d3d*/atan2(-/*@<12242*//*@>132dd*/crazyflie_U./*@>13b1f*/Acc_x, /*@>121b7*/rtb_Sum1_d)/*@>11aff*/ * /*@>1198a*/0.020000000000000018;
+    /* {S!d30}Sum: '<S4>/Sum' incorporates:
+ *  Inport: '<Root>/Ref_Pitch'
+ */
+    /*@>11956*/scale/*@>e6e1*/ = /*@>132e3*/crazyflie_U./*@>13b22*/Ref_Pitch/*@>e6de*/ - /*@>11916*/rtb_Sum1_d;
+    /* {S!d32}Sum: '<S4>/Sum1' */
+    /*@>11958*/absxk/*@>e6e6*/ = /*@>11918*/rtb_Gain_e/*@>e6e3*/ - /*@>1191a*/scale;
+    /* {S!d40}DataTypeConversion: '<S2>/ToUint0' incorporates:
+ *  Sum: '<S2>/Sum'
+ */
+    /*@>11ad0*/t/*@>11ad2*/ = /*@>1197c*/rtb_Sum1_n/*@>fd61*/ + /*@>1197e*/absxk;
+    /*@>124a9*/if (/*@>121cd*/t/*@>121cb*/ < /*@>121ce*/65536.0) {
+        /*@>124bd*/if (/*@>121d2*/t/*@>121d0*/ >= /*@>121d3*/0.0) {
+            /* {S!d34}Outport: '<Root>/Motor_1' */
+            /*@>13394*/crazyflie_Y./*@>13b2b*/Motor_1/*@>124c0*/ = /*@>121d4*/(uint16_T)/*@>121d6*/t;
+        } else {
+            /* {S!d36}Outport: '<Root>/Motor_1' */
+            /*@>1338e*/crazyflie_Y./*@>13b28*/Motor_1/*@>124ac*/ = /*@>139e0*/0U;
+        }
+    } else {
+        /* {S!d38}Outport: '<Root>/Motor_1' */
+        /*@>13387*/crazyflie_Y./*@>13b25*/Motor_1/*@>df79*/ = /*@>121d8*/MAX_uint16_T;
+    }
+    /* {E!d40}End of DataTypeConversion: '<S2>/ToUint0' */
+
+    /* {S!d42}Sum: '<S4>/Sum2' */
+    /*@>1195a*/scale/*@>139f9*/ += /*@>11920*/rtb_Gain_e;
+    /* {S!d44}Sum: '<S2>/Sum1' */
+    /*@>1195c*/rtb_Sum1_n/*@>139fa*/ += /*@>11924*/scale;
+    /* {S!d52}DataTypeConversion: '<S2>/ToUint1' */
+    /*@>124ae*/if (/*@>121e4*/rtb_Sum1_n/*@>121e2*/ < /*@>121e5*/65536.0) {
+        /*@>124c2*/if (/*@>121e9*/rtb_Sum1_n/*@>121e7*/ >= /*@>121ea*/0.0) {
+            /* {S!d46}Outport: '<Root>/Motor_2' */
+            /*@>133aa*/crazyflie_Y./*@>13b34*/Motor_2/*@>124c5*/ = /*@>121eb*/(uint16_T)/*@>121ed*/rtb_Sum1_n;
+        } else {
+            /* {S!d48}Outport: '<Root>/Motor_2' */
+            /*@>133a4*/crazyflie_Y./*@>13b31*/Motor_2/*@>124b1*/ = /*@>139e3*/0U;
+        }
+    } else {
+        /* {S!d50}Outport: '<Root>/Motor_2' */
+        /*@>1339d*/crazyflie_Y./*@>13b2e*/Motor_2/*@>dfd9*/ = /*@>121ef*/MAX_uint16_T;
+    }
+    /* {E!d52}End of DataTypeConversion: '<S2>/ToUint1' */
+
+    /* {S!d54}Sum: '<S3>/Sum2' */
+    /*@>1195e*/rtb_Sum3/*@>139fb*/ += /*@>1192a*/rtb_Gain;
+    /* {S!d56}Sum: '<S2>/Sum2' */
+    /*@>11960*/scale/*@>139fc*/ += /*@>1192c*/rtb_Sum3;
+    /* {S!d64}DataTypeConversion: '<S2>/ToUint2' */
+    /*@>124b3*/if (/*@>121f9*/scale/*@>121f7*/ < /*@>121fa*/65536.0) {
+        /*@>124c7*/if (/*@>121fe*/scale/*@>121fc*/ >= /*@>121ff*/0.0) {
+            /* {S!d58}Outport: '<Root>/Motor_3' */
+            /*@>133c0*/crazyflie_Y./*@>13b3d*/Motor_3/*@>124ca*/ = /*@>12200*/(uint16_T)/*@>12202*/scale;
+        } else {
+            /* {S!d60}Outport: '<Root>/Motor_3' */
+            /*@>133ba*/crazyflie_Y./*@>13b3a*/Motor_3/*@>124b6*/ = /*@>139e6*/0U;
+        }
+    } else {
+        /* {S!d62}Outport: '<Root>/Motor_3' */
+        /*@>133b3*/crazyflie_Y./*@>13b37*/Motor_3/*@>e039*/ = /*@>12204*/MAX_uint16_T;
+    }
+    /* {E!d64}End of DataTypeConversion: '<S2>/ToUint2' */
+
+    /* {S!d66}Sum: '<S2>/Sum3' */
+    /*@>11962*/rtb_Sum3/*@>139fd*/ += /*@>11934*/absxk;
+    /* {S!d74}DataTypeConversion: '<S2>/ToUint3' */
+    /*@>124b8*/if (/*@>1220a*/rtb_Sum3/*@>12208*/ < /*@>1220b*/65536.0) {
+        /*@>124cc*/if (/*@>1220f*/rtb_Sum3/*@>1220d*/ >= /*@>12210*/0.0) {
+            /* {S!d68}Outport: '<Root>/Motor_4' */
+            /*@>133d5*/crazyflie_Y./*@>13b46*/Motor_4/*@>124cf*/ = /*@>12211*/(uint16_T)/*@>12213*/rtb_Sum3;
+        } else {
+            /* {S!d70}Outport: '<Root>/Motor_4' */
+            /*@>133cf*/crazyflie_Y./*@>13b43*/Motor_4/*@>124bb*/ = /*@>139e9*/0U;
+        }
+    } else {
+        /* {S!d72}Outport: '<Root>/Motor_4' */
+        /*@>133c8*/crazyflie_Y./*@>13b40*/Motor_4/*@>e07c*/ = /*@>12215*/MAX_uint16_T;
+    }
+    /* {E!d74}End of DataTypeConversion: '<S2>/ToUint3' */
+
+    /* {S!d76}Update for Delay: '<S6>/Delay' */
+    /*@>13423*/crazyflie_DW./*@>13b4f*/Delay_DSTATE/*@>e62a*/ = /*@>11945*/rtb_Sum;
+    /* {S!d78}Update for Delay: '<S7>/Delay' */
+    /*@>13429*/crazyflie_DW./*@>13b52*/Delay_DSTATE_d/*@>e63b*/ = /*@>11949*/rtb_Sum1_d;
+}
+%<SLibInsertSolverResetCode()>\
+%closefile cfgTxt
+%<cfgTxt>
+%<LibSetSystemField(system, "CachedOutputLocalVars", localVarDecl)>
+%endfunction
+%function OutputsFcnProtoType(block, system) Output
+%assign fcnProtoType = ""
+%openfile fcnProtoType
+static void Outputs(\
+%assign comma = ""
+%closefile fcnProtoType
+%<SLibCG_SetFcnProtoType(0, 0, fcnProtoType)>
+%endfunction
