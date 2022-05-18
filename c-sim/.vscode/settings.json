@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "filter.h": "c",
+        "semphr.h": "c",
+        "constants.h": "c"
+    }
+}
